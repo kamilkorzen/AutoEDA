@@ -1,13 +1,19 @@
 from flask import Flask, redirect, url_for, render_template, request
 import sqlite3
+import numpy as np
 import pandas as pd
-
+import seaborn as sns
+import matplotlib.pyplot as plt
+import matplotlib
+import random
+import string
 
 app = Flask(__name__)
 
 logged=False
 userID=None
 dataset=None
+msg=""
 
 @app.route('/')
 def homepage():
@@ -128,9 +134,10 @@ def show():
     else:
         return redirect(url_for("homepage", content=logged))
 
-@app.route("/datalab")
+@app.route("/datalab", methods = ["GET"])
 def datalab():
-    global logged, userID, dataset
+    global logged, userID, dataset, msg
+    msg=None
     if logged==True:
         return render_template('datalab.html', tables=[dataset.to_html(classes='data')], titles=dataset.columns.values)
     else:
@@ -138,22 +145,23 @@ def datalab():
 
 @app.route("/select", methods=["GET", "POST"])
 def select():
-    global logged, userID, dataset
+    global logged, userID, dataset, msg
     dataset = None
     if logged==True:
         if request.method == "GET":
-            return render_template("select.html")
+            return render_template("select.html", message=msg)
         elif request.method == "POST":
             filename=request.form["filename"]
 
             result = find_by_filename(filename, userID)
             if result:
                 path=result[3]
-                dataset = pd.read_csv(path, sep=';')
+                dataset = pd.read_csv(path, sep=';', decimal=',')
+                msg=""
                 return redirect(url_for("datalab", content=logged))
             else:
+                msg="There is no such file!"
                 return redirect(url_for("select", content=logged))
-
     else:
         return redirect(url_for("homepage", content=logged))
 
@@ -184,7 +192,90 @@ def delete():
     else:
         return redirect(url_for("homepage", content=logged))
 
+#eda
+@app.route('/dist', methods=['POST', 'GET'])
+def dist():
+    global logged, dataset, msg, userID
+    if logged==True:
+        if request.method == "GET":
+            return render_template("dist.html", message=None)
+        elif request.method == "POST":
+            variables = request.form["variables"]
 
+            try:
+                plt.figure()
+                sns.distplot(dataset[variables])
+                plt.savefig("static/fig.png")
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                msg = f"static/fig.png?{randomstring}"
+            except:
+                return render_template("dist.html", message = "Error")
+
+            return render_template("dist.html", message=msg)
+    else:
+        return redirect(url_for("homepage"))
+
+@app.route('/bar', methods=['POST', 'GET'])
+def bar():
+    global logged, dataset, msg, userID
+    if logged==True:
+        if request.method == "GET":
+            return render_template("bar.html", message=None)
+        elif request.method == "POST":
+            xvar = request.form["X"]
+            yvar = request.form["Y"]
+
+            try:
+                plt.figure()
+                sns.barplot(x=dataset[xvar],y=dataset[yvar],data=dataset)
+                plt.xticks(rotation=90)
+                plt.tight_layout()
+                plt.savefig("static/fig.png")
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                msg = f"static/fig.png?{randomstring}"
+            except:
+                return render_template("bar.html", message = "Error")
+
+            return render_template("bar.html", message=msg)
+    else:
+        return redirect(url_for("homepage"))
+
+@app.route('/hex', methods=['POST', 'GET'])
+def hex():
+    global logged, dataset, msg, userID
+    if logged==True:
+        if request.method == "GET":
+            return render_template("hex.html", message=None)
+        elif request.method == "POST":
+            xvar = request.form["X"]
+            yvar = request.form["Y"]
+
+            try:
+                plt.figure()
+                sns.jointplot(x=dataset[xvar],y=dataset[yvar],data=dataset,kind='hex')
+                #plt.xticks(rotation=90)
+                plt.tight_layout()
+                plt.savefig("static/fig.png")
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                msg = f"static/fig.png?{randomstring}"
+            except:
+                return render_template("hex.html", message = "Error")
+
+            return render_template("hex.html", message=msg)
+    else:
+        return redirect(url_for("homepage"))
+
+
+# sns.heatmap(df[v1].corr(),cmap='coolwarm',annot=True)
+# sns.boxplot(x=df["stolica woj.."], y=df[v1[1]],data=df, palette="coolwarm")
+# sns.lmplot(x=v1[1] ,y=v1[2] ,data=df)
+# df.describe()
 #functions===========================================================
 
 def find_by_username(username):

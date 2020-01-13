@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}AutoEDA | Show{% endblock %}
+
+{% block body %}
+<h1> Using your main Dashboard, you can:</h1>
+<a href="/select"><button>Select</button></a><br>
+<a href="/update"><button>Update</button></a><br>
+<a href="/delete"><button>Delete</button></a><br>
+<p> from the variety of your datasets.</p>
+    {% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+    {% endfor %}
+{% endblock %}

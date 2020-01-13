@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}AutoEDA | DataLab{% endblock %}
+
+{% block body %}
+<h1>Welcome to the heart of our Service!</h1>
+<p> When you have properly uploaded your dataset, here you can choose from a variety of pre-programmed scalable EDA Graphs, to quickly analyse your data!</p>
+
+<a href="/dist"><button>Distribution Plot</button></a><br>
+<a href="/hex"><button>Barplot</button></a><br>
+<a href="/bar"><button>Hex Graph</button></a>
+
+    {% for table in tables %}
+            {{titles[loop.index]}}
+            {{ table|safe }}
+    {% endfor %}
+{% endblock %}

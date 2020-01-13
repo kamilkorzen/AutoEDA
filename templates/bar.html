@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Home Page{% endblock %}
+
+{% block body %}
+    {% if message == "Error": %}
+        <p style="color:red;">In There is no such variables in your database, variables have inappropriate type or you typed inappropriate number of variables! </p>
+        <p>In bar plot method you should type names of two variables, first one should be discrete and it will be used for x axis, and the second one for y axis.</p>
+    {% elif message != None: %}
+        <img src = {{message}} />
+    {% elif message == None: %}
+        <p>In bar plot method you should type names of two variables, first one should be discrete and it will be used for x axis, and the second one for y axis.</p>
+    {% endif %}
+    <form action="#" method = "post">
+        <p> Select variables for bar plot: </p>
+        <p> X variable, should be discrete: </p>
+        <p> <input type="text" name="X"</p>
+
+        <p> Y variable: </p>
+        <p> <input type="text" name="Y"</p>
+
+        <p> <input type="submit" value="submit"</p>
+    </form>
+
+{% endblock %}
