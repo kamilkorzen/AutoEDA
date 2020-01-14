@@ -1,25 +1,25 @@
 {% extends "base.html" %}
-{% block title %}AutoEDA | Barplot{% endblock %}
+
+{% block title %}AutoEDA | LM Plot{% endblock %}
 
 {% block body %}
-    {% if message == "Error": %}
+{% if message == "Error": %}
         <p style="color:red;">In There is no such variables in your database, variables have inappropriate type or you typed inappropriate number of variables! </p>
-        <p>In bar plot method you should type names of two variables, first one should be discrete and it will be used for x axis, and the second one for y axis.</p>
+        <p>In box plot method you should type names of two variables, first one should be discrete and it will be used for x axis, and the second one for y axis.</p>
     {% elif message != None: %}
         <img src = {{message}} />
     {% elif message == None: %}
-        <p>In bar plot method you should type names of two variables, first one should be discrete and it will be used for x axis, and the second one for y axis.</p>
+        <p>In linear model plot you should type names of two variables, first one should be the independent and it will be used for y axis, and the second one for x axis (dependent variable).</p>
     {% endif %}
     <form action="#" method = "post">
-        <p> Select variables for bar plot: </p>
-        <p> X variable, should be discrete: </p>
+        <p> Select variables for LM plot: </p>
+        <p> X variable, independent variable: </p>
         <p> <input type="text" name="X"</p>
 
-        <p> Y variable: </p>
+        <p> Y variable, dependent variable: </p>
         <p> <input type="text" name="Y"</p>
 
         <p> <input type="submit" value="submit"</p>
     </form><br>
     <a href="/datalab"><button>click here to return to DataLab.</button></a>
-
 {% endblock %}

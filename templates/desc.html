@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}AutoEDA | Desc{% endblock %}
+
+{% block body %}
+{% if message == "Error": %}
+        <p style="color:red;">In There is no such variables in your database, variables have inappropriate type or you typed inappropriate number of variables! </p>
+        <p>In box plot method you should type names of two variables, first one should be discrete and it will be used for x axis, and the second one for y axis.</p>
+    {% elif message != None: %}
+        <img src = {{message}} />
+    {% elif message == None: %}
+        <p>Below you can find the description and summary statistics of your database.</p>
+    {% endif %}
+<br>
+<a href="/datalab"><button>click here to return to DataLab.</button></a>
+{% endblock %}

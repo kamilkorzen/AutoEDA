@@ -3,7 +3,21 @@
 {% block title %}AutoEDA | Notes{% endblock%}
 
 {% block body %}
-  <h1>Here are your Notes and Tasks:</h1>
-  <p>blah</p>
-  <p>lorem ipsum</p>
+  <h1> Feel free to add a new note:</h1>
+
+  <form action="#" method = "post">
+      <p> Type Note: </p>
+      <p> <input type="text" name="note"</p>
+
+      <p> <input type="submit" value="Submit!"</p>
+  </form><br>
+  <a href="/homepage"><button>or return to Homepage.</button></a>
+
+  <h1>Your notes:</h1>
+
+#  {% for table in tables %}
+#          {{titles[loop.index]}}
+#          {{ table|safe }}
+#  {% endfor %}
+
 {% endblock %}

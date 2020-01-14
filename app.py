@@ -21,13 +21,15 @@ def homepage():
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
+    global logged, userID, msg, dataset
     if request.method == "GET":
         return render_template("register.html")
     elif request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
         if find_by_username(username):
-            return "User already exists"
+            msg="User already exists"
+            return render_template("register.html", message=msg)
         else:
             connection = sqlite3.connect('data.db')
             cursor = connection.cursor()
@@ -36,11 +38,12 @@ def register():
 
             connection.commit()
             connection.close()
-            return redirect(url_for("homepage", content=logged))
+            msg=None
+            return redirect(url_for("homepage"))
 
 @app.route('/login', methods=["POST", "GET"])
 def login():
-    global logged, userID
+    global logged, userID, msg, dataset
     if request.method == "GET":
         return render_template("login.html")
     elif request.method == "POST":
@@ -52,24 +55,29 @@ def login():
             if result[2]==password:
                 logged=True
                 userID=result[0]
-                return redirect(url_for("homepage", content=logged))
+                msg=None
+                return redirect(url_for("homepage"))
             else:
-                return "Wrong password!"
+                msg="Wrong password!"
+                return render_template("login.html", message=msg)
         else:
-            return "User doesn't exist!"
+            msg="User doesn't exist!"
+            return render_template("login.html", message=msg)
+
 @app.route('/logout', methods=["GET"])
 def logout():
-    global logged, userID, dataset
+    global logged, userID, dataset, msg
     logged=False
     userID=None
     dataset=None
-    return redirect(url_for("homepage", content=logged))
+    msg=None
+    return redirect(url_for("homepage"))
 
 
 #data================================================================
 @app.route("/data", methods=["POST", "GET"])
 def data():
-    global logged, userID
+    global logged, userID, msg, dataset
     if logged==True:
         if request.method == "GET":
             return render_template("data.html")
@@ -79,7 +87,8 @@ def data():
 
             result=find_by_filename(filename, userID)
             if result:
-                return "File with this name already exists!"
+                msg="File with this name already exists!"
+                return render_template("data.html", message=msg)
             else:
                 connection = sqlite3.connect('data.db')
                 cursor = connection.cursor()
@@ -88,10 +97,25 @@ def data():
 
                 connection.commit()
                 connection.close()
-                return redirect(url_for("homepage", content=logged))
+
+                msg=None
+                return redirect(url_for("show"))
 
     else:
-        return redirect(url_for("homepage", content=logged))
+        return redirect(url_for("homepage"))
+
+@app.route('/notes', methods = ['GET'])
+def notes():
+    global logged, userID, dataset, msg
+    note = None
+    if logged:
+        if request.method == 'GET':
+            return render_template('notes.html')
+        elif request.method == 'POST':
+            note = request.form['note']
+
+    else:
+        return redirect(url_for('homepage'))
 
 @app.route("/show", methods=["GET"])
 def show():
@@ -132,7 +156,7 @@ def show():
             return render_template('show.html',  tables=[data.to_html(classes='data')], titles=data.columns.values)
 
     else:
-        return redirect(url_for("homepage", content=logged))
+        return redirect(url_for("homepage"))
 
 @app.route("/datalab", methods = ["GET"])
 def datalab():
@@ -141,7 +165,7 @@ def datalab():
     if logged==True:
         return render_template('datalab.html', tables=[dataset.to_html(classes='data')], titles=dataset.columns.values)
     else:
-        return redirect(url_for("homepage", content=logged))
+        return redirect(url_for("homepage"))
 
 @app.route("/select", methods=["GET", "POST"])
 def select():
@@ -149,7 +173,7 @@ def select():
     dataset = None
     if logged==True:
         if request.method == "GET":
-            return render_template("select.html", message=msg)
+            return render_template("select.html")
         elif request.method == "POST":
             filename=request.form["filename"]
 
@@ -157,17 +181,17 @@ def select():
             if result:
                 path=result[3]
                 dataset = pd.read_csv(path, sep=';', decimal=',')
-                msg=""
-                return redirect(url_for("datalab", content=logged))
+                msg=None
+                return redirect(url_for("datalab"))
             else:
                 msg="There is no such file!"
-                return redirect(url_for("select", content=logged))
+                return render_template("select.html", message=msg)
     else:
-        return redirect(url_for("homepage", content=logged))
+        return redirect(url_for("homepage"))
 
 @app.route('/delete', methods=["GET", "POST"])
 def delete():
-    global logged, userID, dataset
+    global logged, userID, dataset, msg
     if logged==True:
         if request.method == "GET":
             return render_template("delete.html")
@@ -185,12 +209,43 @@ def delete():
                 connection.commit()
                 connection.close()
 
-                return redirect(url_for("homepage", content=logged))
+                msg=None
+                return redirect(url_for("show"))
             else:
-                return redirect(url_for("homepage", content=logged))
+                msg="There is no such file!"
+                return render_template("delete.html", message = msg)
 
     else:
-        return redirect(url_for("homepage", content=logged))
+        return redirect(url_for("homepage"))
+
+@app.route("/update", methods=["POST", "GET"])
+def update():
+    global logged, userID, msg, dataset
+    if logged==True:
+        if request.method == "GET":
+            return render_template("update.html")
+        elif request.method == "POST":
+            filename = request.form["filename"]
+            path = request.form["path"]
+
+            result=find_by_filename(filename, userID)
+            if result:
+                connection = sqlite3.connect('data.db')
+                cursor = connection.cursor()
+
+                cursor.execute("UPDATE data SET path = ? WHERE filename=? AND user_id =?", (path, filename, userID))
+
+                connection.commit()
+                connection.close()
+
+                msg=None
+                return render_template("show.html", message=msg)
+            else:
+                msg="There is no such file!"
+                return render_template("update.html", message=msg)
+
+    else:
+        return redirect(url_for("homepage"))
 
 #eda
 @app.route('/dist', methods=['POST', 'GET'])
@@ -271,11 +326,110 @@ def hex():
     else:
         return redirect(url_for("homepage"))
 
+@app.route('/cor', methods=['POST', 'GET'])
+def cor():
+    global dataset, logged, msg, userID
+    if logged==True:
+        if request.method == "GET":
+            return render_template("cor.html", message=None)
+        elif request.method == "POST":
+            variables = request.form["variables"]
+            try:
+                variables = variables.replace(', ', ',')
+                listed = np.array(variables.split(','))
+            except:
+                return render_template("cor.html", message="Error")
 
-# sns.heatmap(df[v1].corr(),cmap='coolwarm',annot=True)
-# sns.boxplot(x=df["stolica woj.."], y=df[v1[1]],data=df, palette="coolwarm")
-# sns.lmplot(x=v1[1] ,y=v1[2] ,data=df)
-# df.describe()
+            try:
+                plt.figure()
+                sns.heatmap(dataset[listed].corr(),cmap='coolwarm',annot=True)
+                plt.tight_layout()
+                plt.savefig("static/fig.png")
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                msg = f"static/fig.png?{randomstring}"
+            except:
+                return render_template("cor.html", message = "Error")
+
+            return render_template("cor.html", message=msg)
+    else:
+        return redirect(url_for("homepage"))
+
+@app.route('/box', methods=['POST', 'GET'])
+def box():
+    global logged, dataset, msg, userID
+    if logged==True:
+        if request.method == "GET":
+            return render_template("box.html", message=None)
+        elif request.method == "POST":
+            xvar = request.form["X"]
+            yvar = request.form["Y"]
+
+            try:
+                plt.figure()
+                sns.boxplot(x=dataset[xvar], y=dataset[yvar], data=dataset, palette="coolwarm")
+                plt.xticks(rotation=90)
+                plt.tight_layout()
+                plt.savefig("static/fig.png")
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                msg = f"static/fig.png?{randomstring}"
+            except:
+                return render_template("box.html", message = "Error")
+
+            return render_template("box.html", message=msg)
+    else:
+        return redirect(url_for("homepage"))
+
+@app.route('/lmplot', methods=['POST', 'GET'])
+def lmplot():
+    global logged, dataset, msg, userID
+    if logged:
+        if request.method == 'GET':
+            return render_template('lmplot.html', message = None)
+        elif request.method == 'POST':
+            xvar = request.form["X"]
+            yvar = request.form["Y"]
+
+            try:
+                plt.figure()
+                sns.lmplot(x = dataset[xvar], y = dataset[yvar], data = dataset)
+                plt.savefig('static/fig.png')
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                msg = f"static/fig.png?{randomstring}"
+            except:
+                return render_template('lmplot.html', message = "Error")
+
+            return render_template('lmplot.html', message = msg)
+        else:
+            return redirect(url_for('homepage'))
+
+@app.route('/desc', methods=['POST', 'GET'])
+def desc():
+    global logged, dataset, msg, userID
+    if logged:
+        if request.method == 'GET':
+            return render_template('desc.html', message = None)
+        elif request.method == 'POST':
+            df = dataset
+
+            try:
+                df.describe()
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+                msg = f'static/fig.png?(randomstring)'
+
+            except:
+                return render_template('desc.html', message = 'Error')
+
+            return render_template('desc.html', message = msg)
+        else:
+            return redirect(url_for('homepage'))
+
 #functions===========================================================
 
 def find_by_username(username):
@@ -310,4 +464,3 @@ def find_by_filename(filename, userID):
 
 if __name__ == "__main__":
     app.run(debug=True)
-
