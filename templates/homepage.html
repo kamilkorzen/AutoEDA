@@ -3,18 +3,17 @@
 {% block title %}AutoEDA | Home Page{% endblock %}
 
 {% block body %}
-    <h1 align="center">Welcome to AutoEDA Home Page!</h1>
+<h1 align="center">Welcome to <b>AutoEDA</b> Home Page!</h1>
+	{% if content == True: %}
+		<h2 align="center">You are logged in!</h2>
+        	<p>Now you can explore the possibilities of our Service. You might start by:</p>
+        	<a href="/show"><button>Viewing Datasets</button></a><br>
+        	<a href="/notes"><button>Viewing Notes</button></a><br>
+        	<a href="/logout"><buttonRet> You may also want to Log Out here.</buttonRet></a>
 
-    {% if content == True: %}
-        <h2 align="center">You are logged in!</h2>
-        <p>Now you can explore the possibilities of our Service. You might start by:</p>
-        <a href="/show"><button>Viewing Datasets</button></a><br>
-        <a href="/notes"><button>Viewing Notes</button></a><br>
-        <a href="/logout"><button> You may also want to Log Out here.</button></a>
-
-    {% elif content == False: %}
-        <h2 align="center">You are not logged in!</h2>
-        <a href="/login"><button style = "margin-left:auto; margin-right:auto; display:block; margin-top:1%">Login</button></a>
-        <h3 align="center">alternatively, click <a href="/register">here</a> to create an account.</h3>
-    {% endif %}
+	{% elif content == False: %}
+        	<h2 align="center">You are not logged in!</h2>
+        	<a href="/login"><button style = "margin-left:auto; margin-right:auto;display:block;margin-top:1%">LOGIN</button></a>
+        	<h3 align="center">alternatively, click <a href="/register">here</a> to create an account.</h3>
+    	{% endif %}
 {% endblock %}

@@ -1,3 +1,9 @@
+# # # # # # # # TO DO LIST # # # # # # # #
+# # 0. Pandas Profiling as inspiration.
+# # 1. Aesthetics of the App (base.html). 
+# # 2. Dropdown Lists instead of typing.
+# # 3. Interactive Charts (d3.js?).
+
 from flask import Flask, redirect, url_for, render_template, request
 import sqlite3
 import numpy as np
@@ -395,7 +401,7 @@ def lmplot():
 
             try:
                 plt.figure()
-                sns.lmplot(x = dataset[xvar], y = dataset[yvar], data = dataset)
+                sns.lmplot(x = xvar, y = yvar, data = dataset)
                 plt.savefig('static/fig.png')
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
