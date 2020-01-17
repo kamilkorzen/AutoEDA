@@ -3,15 +3,12 @@
 {% block title %}AutoEDA | Show{% endblock %}
 
 {% block body %}
-<h1> Using your main Dashboard, you can:</h1>
-<a href="/data"><button>Upload</button></a><br>
-<a href="/select"><button>Select</button></a><br>
-<a href="/update"><button>Update</button></a><br>
-<a href="/delete"><button>Delete</button></a><br>
-<p> from the variety of your datasets.</p><br>
-<a href="/"><button>you can also get back to the Homepage here.</button></a><br>
-    {% for table in tables %}
-            {{titles[loop.index]}}
-            {{ table|safe }}
-    {% endfor %}
+<h1 style = "margin-left: 50px">Below you can view your <b>AutoEDA</b> datasets:</h1>
+
+{% for table in tables %}
+  {{titles[loop.index]}}
+  {{ table|safe }}
+{% endfor %}
+
+<a href="/"><buttonRet style = "margin-left: 50px">Return to Home Page</buttonRet></a>
 {% endblock %}

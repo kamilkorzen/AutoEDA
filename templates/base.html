@@ -9,6 +9,23 @@
   <link rel="stylesheet" href="{{url_for('static', filename='css/base.css') }}">
 
 <style>
+
+.column {
+  float: left;
+  width: 50%;
+  padding: 0px;
+}
+
+.row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 .footer {
    position: fixed;
    font: 15px arial;
@@ -19,7 +36,7 @@
    height: 25px;
    line-height: 25px;
    width: 100%;
-   background-color: #dedaed;
+   background-color: rgba(0, 0, 80, 0.75);
    color: white;
    text-align: center;
 }
@@ -30,22 +47,21 @@ h1 {
   font: 45px verdana;
   font-weight: lighter;
   font-stretch: condensed;
-  align: center;
   color: rgba(0, 0, 80, 0.75);
 }
 
 h2 {
-  margin-top: 30px;
-  margin-bottom: 30px;
-  font: 30px helvetica;
+  margin-top: 50px;
+  margin-bottom: 50px;
+  font: 20px helvetica;
   font-weight: bold;
   align: center;
   color: rgba(0, 0, 80, 0.75);
 }
 
 h3 {
-  margin-top: 15px;
-  margin-bottom: 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
   font: 15px helvetica;
   font-weight: lighter;
   color: rgba(0, 0, 80, 0.50);
@@ -53,45 +69,42 @@ h3 {
 
 p {
   font: 15px helvetica;
-  margin-top: 20px;
+  margin-top: 10px;
   margin-bottom: 10px;
-  margin-right: 20%;
-  margin-left: 175px;
-  color: rgba(0, 0, 80, 0.50);
+  color: rgba(0, 0, 80, 0.75);
 }
 
 button {
   font: 15px verdana;
   font-weight: bold;
-  color: rgba(0, 0, 80, 0.90);
-  margin-top: 15px;
-  margin-bottom: 15px;
-  background-color: #dedaed;
+  color: #f2f2f2;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: rgba(0, 0, 80, 0.75);
   border: none;
   padding: 10px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  #border-radius: 8px;
   cursor: pointer;
+  height: 50px;
   width: 200px;
 }
 
 buttonRet {
   font: 15px verdana;
   font-weight: bold;
-  color: rgba(0, 0, 80, 0.90);
+  color: rgba(0, 0, 80, 0.75);
   margin-top: 10px;
   margin-bottom: 10px;
-  margin-left: 175px;
-  background-color: #e6e6e6;
+  background-color: #dedaed;
   border: none;
   padding: 10px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
-  #border-radius: 8px;
   cursor: pointer;
+  width: 200px;
 }
 
 .sidenav {

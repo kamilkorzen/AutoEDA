@@ -1,16 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Home Page{% endblock %}
+{% block title %}AutoEDA | Update{% endblock %}
 
 {% block body %}
+<h1 style = "margin-left: 50px"><b>AutoEDA</b> Update</h1>
     <form action="#" method = "post">
-        <p> Choose new filepath for existing file, remember that it should be csv file in utf format!</p>
-        <p style="color:red;">{{message}}</p>
-        <p> Type filename: </p>
-        <p> <input type="text" name="filename"</p>
-
-        <p> Type path: </p>
-        <p> <input type="text" name="path"</p>
-
-        <p> <input type="submit" value="submit"</p>
-    </form>
-</h2>{% endblock %}
+          <p style = "margin-left: 50px"> Choose new Filepath for existing file, remember that it should be .csv in UTF!</p>
+          <p style="color:red;">{{message}}</p>
+          <br>
+          <form action="#" method = "post">
+            <p style="margin-left: 50px"> Your Filename: </p>
+            <p style="margin-left: 50px"> <input type="text" name="filename"</p>
+            <p style="margin-left: 50px"> Your Path: </p>
+            <p style="margin-left: 50px"> <input type="text" name="path"</p>
+            <p style="margin-left: 50px"> <input type="submit" value="Update!"</p>
+          </form>
+  <a href="/"><buttonRet style = "margin-left: 50px">Return to Home Page</buttonRet></a>
+{% endblock %}

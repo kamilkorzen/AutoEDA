@@ -3,12 +3,16 @@
 {% block title %}AutoEDA | Delete{% endblock %}
 
 {% block body %}
+<h1 style = "margin-left: 50px"><b>AutoEDA</b> Delete</h1>
     <form action="#" method = "post">
-        <p> In case you'd like to offload some datasets:</p>
-        <p style="color:red;">{{message}}</p>
-        <p> Type Filename to Delete: </p>
-        <p> <input type="text" name="filename"</p>
+          <p style = "margin-left: 50px"> In case you would like to offload some dataset:</p>
+          <p style="color:red;">{{message}}</p>
+          <br>
+          <form action="#" method = "post">
+            <p style="margin-left: 50px"> Type Filename to Delete: </p>
+            <p style="margin-left: 50px"> <input type="text" name="filename"</p>
+            <p style="margin-left: 50px"> <input type="submit" value="Delete!"</p>
+          </form>
+  <a href="/"><buttonRet style = "margin-left: 50px">Return to Home Page</buttonRet></a>
 
-        <p> <input type="submit" value="Submit!"</p>
-    </form>
-</h2>{% endblock %}
+{% endblock %}

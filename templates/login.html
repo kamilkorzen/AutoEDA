@@ -3,15 +3,21 @@
 {% block title %}AutoEDA | Login{% endblock %}
 
 {% block body %}
-  <h1 align="center">Welcome to the Login Page</h1>
-  <p style="color:red;">{{message}}</p>
-  <form action="#" method = "post">
-    <p> Your Username: </p>
-    <p> <input type="text" name="username"</p>
+<h1 align="center"><b>AutoEDA</b></h1>
 
-    <p> Your Password: </p>
-    <p> <input type="text" name="password"</p>
+<h2 align="center">USE THE FORM BELOW TO LOGIN:</h2>
 
-    <p> <input type="submit" value="Login!"</p>
-  </form>
+<p style="color:red;">{{message}}</p>
+
+<form action="#" method = "post">
+  <p align="center"> Your Username: </p>
+  <p align="center"> <input type="text" name="username"</p>
+  <p align="center"> Your Password: </p>
+  <p align="center"> <input type="text" name="password"</p>
+  <p align="center"> <input type="submit" value="Login!"</p>
+</form>
+
+<a href="/">
+  <buttonRet style = "margin-left:auto;margin-right:auto;display:block">Return to Home Page</buttonRet>
+</a>
 {% endblock %}
