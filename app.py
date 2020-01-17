@@ -1,8 +1,9 @@
 # # # # # # # # TO DO LIST # # # # # # # #
 # # 0. Pandas Profiling as inspiration.
-# # 1. Aesthetics of the App (base.html). 
+# # 1. Aesthetics of the App (base.html).
 # # 2. Dropdown Lists instead of typing.
 # # 3. Interactive Charts (d3.js?).
+# # /Users/kamilkorzen/Kamil/Education/MScDSBA/3_Python_and_SQL/AutoEDA/cluster.csv
 
 from flask import Flask, redirect, url_for, render_template, request
 import sqlite3
@@ -110,6 +111,82 @@ def data():
     else:
         return redirect(url_for("homepage"))
 
+
+@app.route('/delete', methods=["GET", "POST"])
+def delete():
+    global logged, userID, dataset, msg
+    if logged==True:
+        connection = sqlite3.connect('data.db')
+        cursor=connection.cursor()
+
+        cursor.execute("SELECT filename FROM data WHERE user_id=?", (userID,))
+        filenames = cursor.fetchall()
+
+        connection.commit()
+        connection.close()
+        if request.method == "GET":
+            return render_template("delete.html", filenames=filenames)
+        elif request.method == "POST":
+
+            filename = request.form["filename"]
+            result = find_by_filename(filename, userID)
+
+            if result:
+                connection=sqlite3.connect("data.db")
+                cursor=connection.cursor()
+
+                cursor.execute("DELETE FROM data WHERE filename=? AND user_id =?", (filename, userID))
+
+                connection.commit()
+                connection.close()
+
+                msg=None
+                return redirect(url_for("homepage"))
+            else:
+                msg="There is no such file!"
+                return render_template("delete.html", message = msg, filenames=filenames)
+
+    else:
+        return redirect(url_for("homepage"))
+
+@app.route("/update", methods=["POST", "GET"])
+def update():
+    global logged, userID, msg, dataset
+    if logged==True:
+        connection = sqlite3.connect('data.db')
+        cursor=connection.cursor()
+
+        cursor.execute("SELECT filename FROM data WHERE user_id=?", (userID,))
+        filenames = cursor.fetchall()
+
+        connection.commit()
+        connection.close()
+        if request.method == "GET":
+            return render_template("update.html", filenames=filenames)
+        elif request.method == "POST":
+            filename = request.form["filename"]
+            path = request.form["path"]
+
+            result=find_by_filename(filename, userID)
+            if result:
+                connection = sqlite3.connect('data.db')
+                cursor = connection.cursor()
+
+                cursor.execute("UPDATE data SET path = ? WHERE filename=? AND user_id =?", (path, filename, userID))
+
+                connection.commit()
+                connection.close()
+
+                msg=None
+                return redirect(url_for("homepage"))
+            else:
+                msg="There is no such file!"
+                return render_template("update.html", message=msg, filenames=filenames)
+
+    else:
+        return redirect(url_for("homepage"))
+
+
 @app.route('/notes', methods = ['GET'])
 def notes():
     global logged, userID, dataset, msg
@@ -164,22 +241,37 @@ def show():
     else:
         return redirect(url_for("homepage"))
 
-@app.route("/datalab", methods = ["GET"])
+@app.route("/datalab", methods = ["GET", "POST"])
 def datalab():
     global logged, userID, dataset, msg
-    msg=None
     if logged==True:
-        return render_template('datalab.html', tables=[dataset.to_html(classes='data')], titles=dataset.columns.values)
-    else:
-        return redirect(url_for("homepage"))
+        connection = sqlite3.connect('data.db')
+        cursor=connection.cursor()
 
-@app.route("/select", methods=["GET", "POST"])
-def select():
-    global logged, userID, dataset, msg
-    dataset = None
-    if logged==True:
+        cursor.execute("SELECT filename FROM data WHERE user_id=?", (userID,))
+        filenames = cursor.fetchall()
+
+        connection.commit()
+        connection.close()
+
         if request.method == "GET":
-            return render_template("select.html")
+            if dataset is not None:
+                data=dataset.describe()
+                data=data.round(2)
+
+                plt.figure(figsize=(0.7*len(dataset.columns),0.7*len(dataset.columns)))
+                sns.heatmap(dataset.corr(), cmap='coolwarm', annot=True)
+                plt.title('Correlation Heatmap')
+                plt.tight_layout()
+                plt.savefig("static/fig.png")
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                msg = None
+                return render_template('datalab.html', tables=[data.to_html(classes='data')], titles=data.columns.values, message=msg, filepath = f"static/fig.png?{randomstring}", filenames=filenames)
+            else:
+                msg=None
+                return render_template('datalab.html', message=msg, filenames=filenames)
         elif request.method == "POST":
             filename=request.form["filename"]
 
@@ -191,67 +283,12 @@ def select():
                 return redirect(url_for("datalab"))
             else:
                 msg="There is no such file!"
-                return render_template("select.html", message=msg)
-    else:
-        return redirect(url_for("homepage"))
-
-@app.route('/delete', methods=["GET", "POST"])
-def delete():
-    global logged, userID, dataset, msg
-    if logged==True:
-        if request.method == "GET":
-            return render_template("delete.html")
-        elif request.method == "POST":
-
-            filename = request.form["filename"]
-            result = find_by_filename(filename, userID)
-
-            if result:
-                connection=sqlite3.connect("data.db")
-                cursor=connection.cursor()
-
-                cursor.execute("DELETE FROM data WHERE filename=? AND user_id =?", (filename, userID))
-
-                connection.commit()
-                connection.close()
-
-                msg=None
-                return redirect(url_for("show"))
-            else:
-                msg="There is no such file!"
-                return render_template("delete.html", message = msg)
+                return render_template("datalab.html", message=msg, filenames=filenames)
 
     else:
         return redirect(url_for("homepage"))
 
-@app.route("/update", methods=["POST", "GET"])
-def update():
-    global logged, userID, msg, dataset
-    if logged==True:
-        if request.method == "GET":
-            return render_template("update.html")
-        elif request.method == "POST":
-            filename = request.form["filename"]
-            path = request.form["path"]
 
-            result=find_by_filename(filename, userID)
-            if result:
-                connection = sqlite3.connect('data.db')
-                cursor = connection.cursor()
-
-                cursor.execute("UPDATE data SET path = ? WHERE filename=? AND user_id =?", (path, filename, userID))
-
-                connection.commit()
-                connection.close()
-
-                msg=None
-                return render_template("show.html", message=msg)
-            else:
-                msg="There is no such file!"
-                return render_template("update.html", message=msg)
-
-    else:
-        return redirect(url_for("homepage"))
 
 #eda
 @app.route('/dist', methods=['POST', 'GET'])
@@ -411,28 +448,6 @@ def lmplot():
                 return render_template('lmplot.html', message = "Error")
 
             return render_template('lmplot.html', message = msg)
-        else:
-            return redirect(url_for('homepage'))
-
-@app.route('/desc', methods=['POST', 'GET'])
-def desc():
-    global logged, dataset, msg, userID
-    if logged:
-        if request.method == 'GET':
-            return render_template('desc.html', message = None)
-        elif request.method == 'POST':
-            df = dataset
-
-            try:
-                df.describe()
-
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
-                msg = f'static/fig.png?(randomstring)'
-
-            except:
-                return render_template('desc.html', message = 'Error')
-
-            return render_template('desc.html', message = msg)
         else:
             return redirect(url_for('homepage'))
 

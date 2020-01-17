@@ -1,18 +1,22 @@
 {% extends "base.html" %}
-
 {% block title %}AutoEDA | Delete{% endblock %}
-
 {% block body %}
 <h1 style = "margin-left: 50px"><b>AutoEDA</b> Delete</h1>
-    <form action="#" method = "post">
-          <p style = "margin-left: 50px"> In case you would like to offload some dataset:</p>
-          <p style="color:red;">{{message}}</p>
-          <br>
-          <form action="#" method = "post">
-            <p style="margin-left: 50px"> Type Filename to Delete: </p>
-            <p style="margin-left: 50px"> <input type="text" name="filename"</p>
-            <p style="margin-left: 50px"> <input type="submit" value="Delete!"</p>
-          </form>
-  <a href="/"><buttonRet style = "margin-left: 50px">Return to Home Page</buttonRet></a>
 
+<form action="#" method = "post">
+  <p style = "margin-left: 50px"> Just in case You would like to offload any dataset:</p>
+  <p style="color:red;">{{message}}</p>
+  <br>
+
+<form action="#" method = "post">
+  <p style="margin-left: 50px"> Type Filename to Delete: </p>
+  <p style="margin-left: 50px"><select name = "filename">
+    {% for item in filenames: %}
+    <option value = {{item[0]}} selected>{{item[0]}}</option>
+    {% endfor %}
+  </select>
+  <p style="margin-left: 50px"> <input type="submit" value="Delete!"</p>
+</form>
+
+<a href="/"><buttonRet style = "margin-left: 50px">Return to Home Page</buttonRet></a>
 {% endblock %}
