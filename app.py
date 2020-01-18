@@ -35,7 +35,7 @@ def register():
         username = request.form["username"]
         password = request.form["password"]
         if find_by_username(username):
-            msg="User already exists"
+            msg="USER ALREADY EXISTS"
             return render_template("register.html", message=msg)
         else:
             connection = sqlite3.connect('data.db')
@@ -65,10 +65,10 @@ def login():
                 msg=None
                 return redirect(url_for("homepage"))
             else:
-                msg="Wrong password!"
+                msg="WRONG PASSWORD"
                 return render_template("login.html", message=msg)
         else:
-            msg="User doesn't exist!"
+            msg="USER DOESN'T EXIST"
             return render_template("login.html", message=msg)
 
 @app.route('/logout', methods=["GET"])
@@ -94,7 +94,7 @@ def data():
 
             result=find_by_filename(filename, userID)
             if result:
-                msg="File with this name already exists!"
+                msg="FILE WITH THIS NAME ALREADY EXISTS"
                 return render_template("data.html", message=msg)
             else:
                 connection = sqlite3.connect('data.db')
@@ -143,7 +143,7 @@ def delete():
                 msg=None
                 return redirect(url_for("homepage"))
             else:
-                msg="There is no such file!"
+                msg="THERE IS NO SUCH FILE"
                 return render_template("delete.html", message = msg, filenames=filenames)
 
     else:
@@ -180,7 +180,7 @@ def update():
                 msg=None
                 return redirect(url_for("homepage"))
             else:
-                msg="There is no such file!"
+                msg="THERE IS NO SUCH FILE"
                 return render_template("update.html", message=msg, filenames=filenames)
 
     else:
@@ -259,7 +259,7 @@ def datalab():
                 data=dataset.describe()
                 data=data.round(2)
 
-                plt.figure(figsize=(0.7*len(dataset.columns),0.7*len(dataset.columns)))
+                plt.figure(figsize=(1,1), dpi = 100)
                 sns.heatmap(dataset.corr(), cmap='coolwarm', annot=True)
                 plt.title('Correlation Heatmap')
                 plt.tight_layout()
@@ -282,7 +282,7 @@ def datalab():
                 msg=None
                 return redirect(url_for("datalab"))
             else:
-                msg="There is no such file!"
+                msg="THERE IS NO SUCH FILE"
                 return render_template("datalab.html", message=msg, filenames=filenames)
 
     else:

@@ -9,7 +9,7 @@
 
     <form action="#" method="post">
     {% if message != None: %}
-      <p style="color:red;">{{message}}</p>
+    <p align="center" style="color:red; font:15px verdana;">{{message}}</p>
     {% endif %}
       <p style="margin-left: 50px">Select Dataset:</p>
       <p style="margin-left: 50px"><select name = "filename">
@@ -20,13 +20,15 @@
 
       <p style="margin-left: 50px"><input type="submit" value = "Submit!"</p><br>
 
-      <a href="/"><buttonRet>Return to Home Page</buttonRet></a>
       {% if filepath: %}
         {% for table in tables %}
                   {{ table|safe }}
         {% endfor %}
         <img src = {{filepath}} />
       {% endif %}
+
+      <a href="/"><buttonRet>Return to Home Page</buttonRet></a>
+
   </div>
 
   <div class="column">
