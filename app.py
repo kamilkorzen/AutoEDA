@@ -22,9 +22,37 @@ userID=None
 dataset=None
 msg=""
 
-@app.route('/')
+@app.route('/', methods = ["POST", "GET"])
 def homepage():
-    return render_template('homepage.html', content=logged)
+    global logged, userID, msg, dataset
+    if logged:
+        if request.method == "GET":
+            return render_template("homepage.html", content = logged)
+        elif request.method == "POST":
+            note = request.form["note"]
+            connection = sqlite3.connect("data.db")
+            cursor = connection.cursor()
+            cursor.execute("INSERT INTO notes VALUES (NULL, ?, ?)", (userID, note))
+            connection.commit()
+            connection.close()
+            msg = None
+
+            connection = sqlite3.connect("data.db")
+            cursor = connection.cursor()
+            result = cursor.execute("SELECT note FROM notes WHERE user_id=?", (userID,))
+            rows = result.fetchall()
+            notes = []
+
+            connection.commit()
+            connection.close()
+
+            for row in rows:
+                notes.append({"note": row[0]})
+            data = pd.DataFrame(notes)
+
+            return redirect(url_for("homepage"))
+
+    return render_template('homepage.html', content = logged)
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
@@ -259,7 +287,7 @@ def datalab():
                 data=dataset.describe()
                 data=data.round(2)
 
-                plt.figure(figsize=(1,1), dpi = 100)
+                plt.figure(figsize=(0.7*len(dataset.columns),0.7*len(dataset.columns)), dpi = 100)
                 sns.heatmap(dataset.corr(), cmap='coolwarm', annot=True)
                 plt.title('Correlation Heatmap')
                 plt.tight_layout()
@@ -267,8 +295,10 @@ def datalab():
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
+                info, con, dis = get_info(dataset)
+
                 msg = None
-                return render_template('datalab.html', tables=[data.to_html(classes='data')], titles=data.columns.values, message=msg, filepath = f"static/fig.png?{randomstring}", filenames=filenames)
+                return render_template('datalab.html', tables=[data.to_html(classes='data')], titles=data.columns.values, message=msg, filepath = f"static/fig.png?{randomstring}", filenames=filenames, info=info, con=con, dis=dis)
             else:
                 msg=None
                 return render_template('datalab.html', message=msg, filenames=filenames)
@@ -482,6 +512,59 @@ def find_by_filename(filename, userID):
 
     connection.close()
     return data
+
+def get_info(df):
+    discrete=0
+    continuous=0
+    info=[]
+    for i, item in enumerate(df.columns):
+        if df[item].dtype == 'float64':
+            continuous+=1
+            inf=[]
+
+            inf.append(f"Name: {item}")
+            inf.append('continuous')
+            inf.append(f"Mean: {df[item].mean()}")
+            inf.append(f"Q1: {df[item].quantile(0.25)}")
+            inf.append(f"Median: {df[item].median()}")
+            inf.append(f"Q3: {df[item].quantile(0.75)}")
+            inf.append(f"Max: {df[item].max()}")
+            inf.append(f"Min: {df[item].min()}")
+            inf.append(f"Var: {df[item].var()}")
+            inf.append(f"Std: {df[item].std()}")
+
+            plt.figure()
+            sns.distplot(df[item], hist=False)
+            plt.tight_layout()
+            plt.savefig(f"static/fig{i}.png")
+            randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+            inf.append(f"static/fig{i}.png?{randomstring}")
+
+            info.append(inf)
+        elif df[item].dtype == 'int64' or df[item].dtype == 'object':
+            discrete+=1
+            inf=[]
+
+            inf.append(f"Name: {item}")
+            inf.append('discrete')
+            inf.append(f"Number of levels: {df[item].nunique()}")
+            inf.append(f"Mode: {df[item].mode()[0]}")
+            inf.append(f"Mode frequency: {sum(df[item] == df[item].mode()[0])}")
+            inf.append(f"Mode as %: {(sum(df[item] == df[item].mode()[0]))/len(df[item])}")
+
+            plt.figure()
+            sns.countplot(x=item, data=df)
+            if df[item].dtype == 'object':
+                plt.xticks(rotation=90)
+            plt.tight_layout()
+            plt.savefig(f"static/fig{i}.png")
+            randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+            inf.append(f"static/fig{i}.png?{randomstring}")
+
+            info.append(inf)
+
+    return (info, f"Number of continuous variables: {continuous}", f"Number of discrete variables: {discrete}")
+
 
 if __name__ == "__main__":
     app.run(debug=True)
