@@ -3,7 +3,7 @@
 # # 1. Aesthetics of the App (base.html).
 # # 2. Dropdown Lists instead of typing.
 # # 3. Interactive Charts (d3.js?).
-# # /Users/kamilkorzen/Kamil/Education/MScDSBA/3_Python_and_SQL/AutoEDA/cluster.csv
+# # /Users/kamilkorzen/Kamil/Education/MScDSBA/3_Python_and_SQL/AutoEDA/data.csv
 
 from flask import Flask, redirect, url_for, render_template, request
 import sqlite3
