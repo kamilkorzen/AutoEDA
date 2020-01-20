@@ -5,7 +5,7 @@
 <div class="row">
   <div class="column">
     <h1 style = "margin-left: 50px"><b>AutoEDA</b> DataLab</h1>
-    <p style = "margin-left: 50px">With uploaded dataset, choose from a variety of pre-programmed scalable EDA Graphs, to quickly analyse your data!</p>
+    <p style = "margin-left: 50px">Choose from a variety of pre-programmed scalable EDA Graphs, to quickly analyse your data!</p>
     <form action="#" method="post">
     {% if message != None: %}
     <p align="center" style="color:red; font:15px verdana;">{{message}}</p>
@@ -19,15 +19,15 @@
       <p style="margin-left: 50px"><input type="submit" value = "Submit!"</p><br>
     </form>
 
-      <p style="margin-left: 50px">{{con}}</p>
-      <p style="margin-left: 50px">{{dis}}</p>
+      <p style="margin-left: 50px"><b>{{con}}</b></p>
+      <p style="margin-left: 50px"><b>{{dis}}</b></p>
 
 
       {% if filepath: %}
         {% for table in tables %}
                   {{ table|safe }}
         {% endfor %}
-        <img src = {{filepath}} width=720 />
+        <img src = {{filepath}} width=640 />
       {% endif %}
 
       <br><a style="margin-left: 50px" href="/"><buttonRet>Return to Home Page</buttonRet></a>
@@ -37,12 +37,13 @@
 
   <div class="column">
     <h1 style = "margin-left: 50px"><b>Variables Breakdown</h1>
-    <p>For higher resolution, open the Plot in new tab.</p><hr>
+    <p align = "right" style="margin-right: 50px">*For higher resolution, open the Plot in new Tab.</p><hr>
     {% for item in info: %}
       <div class = "row">
       {% if item[1]== "discrete":%}
+        <br>
         <div class = "column">
-        <a href = "/datalab/{{item[0]}}"><b>{{item[0]}}</b></a>
+        <a href = "/datalab/{{item[0]}}"><b>Name: {{item[0]}}</b></a>
         <p>Type: {{item[1]}}</p>
         <p>{{item[2]}}</p>
         <p>{{item[3]}}</p>
@@ -55,8 +56,9 @@
       </div>
       <div class = "row">
       {% elif item[1]== "continuous": %}
+        <br>
         <div class = "column">
-        <a href = "/datalab/{{item[0]}}"><b>{{item[0]}}</b></a>
+        <a href = "/datalab/{{item[0]}}"><b>Name: {{item[0]}}</b></a>
         <p>Type: {{item[1]}}</p>
         <p>{{item[2]}}</p>
         <p>{{item[3]}}</p>

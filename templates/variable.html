@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}AutoEDA | Variable{% endblock %}
+
+{% block body %}
+  {% if message == "Error": %}
+    <p align="center" style="color:red; font:15px verdana;">ERROR</p>
+    {% elif message != None: %}
+      <img src = {{message}} />
+    {% elif message == None: %}
+      <h1 style="margin-left: 50px">Variable <b>{{variable}}</b> plotted against <b>all other Vars</b> in Dataset</h1>
+      <br><a style="margin-left: 50px" href="/datalab"><buttonRet>Return to DataLab</buttonRet></a>
+      {% for object in listed %}
+        <hr>
+        <h2 style="margin-left: 50px">Var. {{variable}} plotted against Var. {{object[0]}}:</h2>
+        <img align = "center" src = {{object[1]}} width=720 />
+      {% endfor %}
+    {% endif %}
+{% endblock %}

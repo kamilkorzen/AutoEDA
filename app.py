@@ -9,6 +9,9 @@ import matplotlib.pyplot as plt
 import matplotlib
 import random
 import string
+from datetime import date
+
+matplotlib.use('Agg')
 
 app = Flask(__name__)
 
@@ -22,12 +25,33 @@ def homepage():
     global logged, userID, msg, dataset
     if logged:
         if request.method == "GET":
-            return render_template("homepage.html", content = logged)
+
+            connection = sqlite3.connect('data.db')
+            cursor = connection.cursor()
+
+            cursor.execute('SELECT id, note, date FROM notes WHERE user_id==?', (userID,))
+            rows = cursor.fetchall()
+
+            if len(rows)>20:
+                cursor.execute("DELETE FROM notes WHERE id=? AND user_id =?", (rows[0][0], userID))
+
+            notes=[]
+
+            connection.commit()
+            connection.close()
+
+            for row in rows:
+                notes.append({"Note": row[1], "Date": row[2]})
+            data = pd.DataFrame(notes)
+            data = data.reindex(index=data.index[::-1])
+
+            return render_template('homepage.html',  tables=[data.to_html(classes='data')], titles=data.columns.values, content = logged)
+
         elif request.method == "POST":
             note = request.form["note"]
             connection = sqlite3.connect("data.db")
             cursor = connection.cursor()
-            cursor.execute("INSERT INTO notes VALUES (NULL, ?, ?)", (userID, note))
+            cursor.execute("INSERT INTO notes VALUES (NULL, ?, ?, ?)", (userID, note, date.today()))
             connection.commit()
             connection.close()
             msg = None
@@ -115,7 +139,12 @@ def data():
         elif request.method == "POST":
             filename = request.form["filename"]
             path = request.form["path"]
-
+            try:
+                a=pd.read_csv(path, sep=';', decimal=',')
+                del a
+            except:
+                msg="This is not CSV file in UTF-8 format!"
+                return render_template("data.html", message=msg)
             result=find_by_filename(filename, userID)
             if result:
                 msg="FILE WITH THIS NAME ALREADY EXISTS"
@@ -285,9 +314,8 @@ def datalab():
 
                 plt.figure(figsize=(0.7*len(dataset.columns),0.7*len(dataset.columns)), dpi = 100)
                 sns.heatmap(dataset.corr(), cmap='coolwarm', annot=True)
-                plt.title('Correlation Heatmap')
                 plt.tight_layout()
-                plt.savefig("static/fig.png")
+                plt.savefig("static/fig.png", transparent=True)
                 plt.close()
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
@@ -315,7 +343,19 @@ def datalab():
     else:
         return redirect(url_for("homepage"))
 
-
+@app.route("/datalab/<varname>")
+def variable(varname):
+    global logged, dataset, msg, userID
+    if logged==True:
+        if request.method == "GET":
+            if dataset is not None:
+                listed=plotter(varname, dataset)
+                return render_template('variable.html', message=msg, listed=listed, variable=varname)
+            else:
+                msg=None
+                return redirect(url_for('datalab.html'))
+    else:
+        return redirect(url_for("homepage"))
 
 #eda
 @app.route('/dist', methods=['POST', 'GET'])
@@ -330,7 +370,7 @@ def dist():
             try:
                 plt.figure()
                 sns.distplot(dataset[variables])
-                plt.savefig("static/fig.png")
+                plt.savefig("static/fig.png", transparent=True)
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
@@ -357,7 +397,7 @@ def bar():
                 sns.barplot(x=dataset[xvar],y=dataset[yvar],data=dataset)
                 plt.xticks(rotation=90)
                 plt.tight_layout()
-                plt.savefig("static/fig.png")
+                plt.savefig("static/fig.png", transparent=True)
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
@@ -384,7 +424,7 @@ def hex():
                 sns.jointplot(x=dataset[xvar],y=dataset[yvar],data=dataset,kind='hex')
                 #plt.xticks(rotation=90)
                 plt.tight_layout()
-                plt.savefig("static/fig.png")
+                plt.savefig("static/fig.png", transparent=True)
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
@@ -414,7 +454,7 @@ def cor():
                 plt.figure()
                 sns.heatmap(dataset[listed].corr(),cmap='coolwarm',annot=True)
                 plt.tight_layout()
-                plt.savefig("static/fig.png")
+                plt.savefig("static/fig.png", transparent=True)
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
@@ -441,7 +481,7 @@ def box():
                 sns.boxplot(x=dataset[xvar], y=dataset[yvar], data=dataset, palette="coolwarm")
                 plt.xticks(rotation=90)
                 plt.tight_layout()
-                plt.savefig("static/fig.png")
+                plt.savefig("static/fig.png", transparent=True)
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
@@ -466,7 +506,7 @@ def lmplot():
             try:
                 plt.figure()
                 sns.lmplot(x = xvar, y = yvar, data = dataset)
-                plt.savefig('static/fig.png')
+                plt.savefig('static/fig.png', transparent=True)
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
@@ -519,7 +559,7 @@ def get_info(df):
             continuous+=1
             inf=[]
 
-            inf.append(f"Name: {item}")
+            inf.append(item)
             inf.append('continuous')
             inf.append(f"Mean: {df[item].mean()}")
             inf.append(f"Q1: {df[item].quantile(0.25)}")
@@ -534,7 +574,7 @@ def get_info(df):
             sns.distplot(df[item], hist=False)
             plt.title(f"{item} distribution")
             plt.tight_layout()
-            plt.savefig(f"static/fig{i}.png")
+            plt.savefig(f"static/fig{i}.png", transparent=True)
             plt.close()
 
             randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
@@ -545,7 +585,7 @@ def get_info(df):
             discrete+=1
             inf=[]
 
-            inf.append(f"Name: {item}")
+            inf.append(item)
             inf.append('discrete')
             inf.append(f"Levels: {df[item].nunique()}")
             inf.append(f"Mode: {df[item].mode()[0]}")
@@ -558,7 +598,7 @@ def get_info(df):
                 plt.xticks(rotation=90)
             plt.title(f"{item} distribution")
             plt.tight_layout()
-            plt.savefig(f"static/fig{i}.png")
+            plt.savefig(f"static/fig{i}.png", transparent=True)
             plt.close()
             randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
             inf.append(f"static/fig{i}.png?{randomstring}")
@@ -568,58 +608,62 @@ def get_info(df):
     return (info, f"Continuous Variables: {continuous}", f"Discrete Variables: {discrete}")
 
 def plotter(var, dataset):
-    listed=[var]
+    listed=[]
     for i, item in enumerate(dataset.columns):
         if item!=var:
             if dataset[item].dtype=='float64' and dataset[var].dtype=='float64':
                 plt.figure()
                 sns.lmplot(x = item, y = var, data = dataset)
+                plt.title(f"Scatter plot: {var} vs {item}")
                 plt.xlabel(item)
                 plt.ylabel(var)
                 plt.tight_layout()
-                plt.savefig(f"static/plot{i}.png")
+                plt.savefig(f"static/plot{i}.png", transparent=True)
                 plt.close()
 
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+                randomstring = ''.join(random.choice(string.ascii_letters) for i in range(10))
 
-                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+                listed.append([item, f"/static/plot{i}.png?{randomstring}"])
             elif dataset[item].dtype in ['int64', 'object'] and dataset[var].dtype=='float64':
                 plt.figure()
                 sns.boxplot(x = item, y = var, data = dataset)
                 plt.xlabel(item)
                 plt.ylabel(var)
+                plt.title(f"Box plot: {var} vs {item}")
+                plt.xticks(rotation=90)
                 plt.tight_layout()
-                plt.savefig(f"static/plot{i}.png")
+                plt.savefig(f"static/plot{i}.png", transparent=True)
                 plt.close()
 
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+                randomstring = ''.join(random.choice(string.ascii_letters) for i in range(10))
 
-                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+                listed.append([item, f"/static/plot{i}.png?{randomstring}"])
             elif dataset[item].dtype == 'float64' and dataset[var].dtype in ['int64', 'object']:
                 plt.figure()
-                sns.barplot(x=item, y=var, data=dataset)
+                sns.barplot(x=item, y=var, data=dataset, orient="h")
                 plt.xlabel(item)
                 plt.ylabel(var)
+                plt.title(f"Bar plot: {var} vs {item}")
                 plt.tight_layout()
-                plt.savefig(f"static/plot{i}.png")
+                plt.savefig(f"static/plot{i}.png", transparent=True)
                 plt.close()
 
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+                randomstring = ''.join(random.choice(string.ascii_letters) for i in range(10))
 
-                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+                listed.append([item, f"/static/plot{i}.png?{randomstring}"])
             elif dataset[item].dtype in ['int64', 'object'] and dataset[var].dtype in ['int64', 'object']:
                 plt.figure()
                 sns.countplot(x = var, hue = item, data = dataset)
                 plt.xticks(rotation=90)
-                plt.xlabel(item)
-                plt.ylabel(var)
+                plt.xlabel(var)
+                plt.title(f"Count plot: {var} vs {item}")
                 plt.tight_layout()
-                plt.savefig(f"static/plot{i}.png")
+                plt.savefig(f"static/plot{i}.png", transparent=True)
                 plt.close()
 
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+                randomstring = ''.join(random.choice(string.ascii_letters) for i in range(10))
 
-                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+                listed.append([item, f"/static/plot{i}.png?{randomstring}"])
     return listed
 
 if __name__ == "__main__":

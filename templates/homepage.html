@@ -25,6 +25,10 @@
 		  <p style="margin-left: 50px"> <input type="submit" value="Add!"</p>
 		</form>
 
+		{% for table in tables %}
+			{{ table|safe }}
+        {% endfor %}
+
 	</div>
 </div>
 
