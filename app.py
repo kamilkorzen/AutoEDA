@@ -1,8 +1,3 @@
-# # # # # # # # TO DO LIST # # # # # # # #
-# # 0. Pandas Profiling as inspiration.
-# # 1. Aesthetics of the App (base.html).
-# # 2. Dropdown Lists instead of typing.
-# # 3. Interactive Charts (d3.js?).
 # # /Users/kamilkorzen/Kamil/Education/MScDSBA/3_Python_and_SQL/AutoEDA/data.csv
 
 from flask import Flask, redirect, url_for, render_template, request
@@ -53,6 +48,7 @@ def homepage():
             return redirect(url_for("homepage"))
 
     return render_template('homepage.html', content = logged)
+
 
 @app.route('/register', methods=["POST", "GET"])
 def register():
@@ -292,6 +288,7 @@ def datalab():
                 plt.title('Correlation Heatmap')
                 plt.tight_layout()
                 plt.savefig("static/fig.png")
+                plt.close()
 
                 randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
 
@@ -535,8 +532,11 @@ def get_info(df):
 
             plt.figure()
             sns.distplot(df[item], hist=False)
+            plt.title(f"{item} distribution")
             plt.tight_layout()
             plt.savefig(f"static/fig{i}.png")
+            plt.close()
+
             randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
             inf.append(f"static/fig{i}.png?{randomstring}")
 
@@ -547,24 +547,80 @@ def get_info(df):
 
             inf.append(f"Name: {item}")
             inf.append('discrete')
-            inf.append(f"Number of levels: {df[item].nunique()}")
+            inf.append(f"Levels: {df[item].nunique()}")
             inf.append(f"Mode: {df[item].mode()[0]}")
-            inf.append(f"Mode frequency: {sum(df[item] == df[item].mode()[0])}")
+            inf.append(f"Mode Freq.: {sum(df[item] == df[item].mode()[0])}")
             inf.append(f"Mode as %: {(sum(df[item] == df[item].mode()[0]))/len(df[item])}")
 
             plt.figure()
             sns.countplot(x=item, data=df)
             if df[item].dtype == 'object':
                 plt.xticks(rotation=90)
+            plt.title(f"{item} distribution")
             plt.tight_layout()
             plt.savefig(f"static/fig{i}.png")
+            plt.close()
             randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
             inf.append(f"static/fig{i}.png?{randomstring}")
 
             info.append(inf)
 
-    return (info, f"Number of continuous variables: {continuous}", f"Number of discrete variables: {discrete}")
+    return (info, f"Continuous Variables: {continuous}", f"Discrete Variables: {discrete}")
 
+def plotter(var, dataset):
+    listed=[var]
+    for i, item in enumerate(dataset.columns):
+        if item!=var:
+            if dataset[item].dtype=='float64' and dataset[var].dtype=='float64':
+                plt.figure()
+                sns.lmplot(x = item, y = var, data = dataset)
+                plt.xlabel(item)
+                plt.ylabel(var)
+                plt.tight_layout()
+                plt.savefig(f"static/plot{i}.png")
+                plt.close()
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+            elif dataset[item].dtype in ['int64', 'object'] and dataset[var].dtype=='float64':
+                plt.figure()
+                sns.boxplot(x = item, y = var, data = dataset)
+                plt.xlabel(item)
+                plt.ylabel(var)
+                plt.tight_layout()
+                plt.savefig(f"static/plot{i}.png")
+                plt.close()
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+            elif dataset[item].dtype == 'float64' and dataset[var].dtype in ['int64', 'object']:
+                plt.figure()
+                sns.barplot(x=item, y=var, data=dataset)
+                plt.xlabel(item)
+                plt.ylabel(var)
+                plt.tight_layout()
+                plt.savefig(f"static/plot{i}.png")
+                plt.close()
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+            elif dataset[item].dtype in ['int64', 'object'] and dataset[var].dtype in ['int64', 'object']:
+                plt.figure()
+                sns.countplot(x = var, hue = item, data = dataset)
+                plt.xticks(rotation=90)
+                plt.xlabel(item)
+                plt.ylabel(var)
+                plt.tight_layout()
+                plt.savefig(f"static/plot{i}.png")
+                plt.close()
+
+                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
+
+                listed.append([item, f"static/plot{i}.png?{randomstring}"])
+    return listed
 
 if __name__ == "__main__":
     app.run(debug=True)
