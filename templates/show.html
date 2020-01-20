@@ -4,7 +4,6 @@
 <h1 style = "margin-left: 50px">Here are Your <b>AutoEDA</b> datasets:</h1>
 
 {% for table in tables %}
-  {{titles[loop.index]}}
   {{ table|safe }}
 {% endfor %}
 
