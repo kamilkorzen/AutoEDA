@@ -23,11 +23,15 @@
       <p style="margin-left: 50px"><b>{{dis}}</b></p>
 
 
+      <div style="overflow-x:scroll;">
       {% if filepath: %}
         {% for table in tables %}
                   {{ table|safe }}
         {% endfor %}
+      </div>
+      <div style="overflow-x:scroll;">
         <img src = {{filepath}} width=640 />
+      </div>
       {% endif %}
 
       <br><a style="margin-left: 50px" href="/"><buttonRet>Return to Home Page</buttonRet></a>

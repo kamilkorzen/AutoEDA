@@ -667,4 +667,4 @@ def plotter(var, dataset):
     return listed
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug = False)
