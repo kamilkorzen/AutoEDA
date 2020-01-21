@@ -16,7 +16,7 @@ Note: there is also automatically created admin account, that have access to all
 
 # Dependencies
 
-Flask, sqlite3, numpy, pandas, seaborn, matplotlib.
+`Flask, sqlite3, numpy, pandas, seaborn, matplotlib.`
 
 # Authors
 
