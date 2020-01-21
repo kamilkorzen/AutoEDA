@@ -73,7 +73,6 @@ def homepage():
 
     return render_template('homepage.html', content = logged)
 
-
 @app.route('/register', methods=["POST", "GET"])
 def register():
     global logged, userID, msg, dataset
@@ -128,8 +127,6 @@ def logout():
     msg=None
     return redirect(url_for("homepage"))
 
-
-#data================================================================
 @app.route("/data", methods=["POST", "GET"])
 def data():
     global logged, userID, msg, dataset
@@ -163,7 +160,6 @@ def data():
 
     else:
         return redirect(url_for("homepage"))
-
 
 @app.route('/delete', methods=["GET", "POST"])
 def delete():
@@ -238,20 +234,6 @@ def update():
 
     else:
         return redirect(url_for("homepage"))
-
-
-@app.route('/notes', methods = ['GET'])
-def notes():
-    global logged, userID, dataset, msg
-    note = None
-    if logged:
-        if request.method == 'GET':
-            return render_template('notes.html')
-        elif request.method == 'POST':
-            note = request.form['note']
-
-    else:
-        return redirect(url_for('homepage'))
 
 @app.route("/show", methods=["GET"])
 def show():
@@ -356,169 +338,6 @@ def variable(varname):
                 return redirect(url_for('datalab.html'))
     else:
         return redirect(url_for("homepage"))
-
-#eda
-@app.route('/dist', methods=['POST', 'GET'])
-def dist():
-    global logged, dataset, msg, userID
-    if logged==True:
-        if request.method == "GET":
-            return render_template("dist.html", message=None)
-        elif request.method == "POST":
-            variables = request.form["variables"]
-
-            try:
-                plt.figure()
-                sns.distplot(dataset[variables])
-                plt.savefig("static/fig.png", transparent=True)
-
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
-
-                msg = f"static/fig.png?{randomstring}"
-            except:
-                return render_template("dist.html", message = "Error")
-
-            return render_template("dist.html", message=msg)
-    else:
-        return redirect(url_for("homepage"))
-
-@app.route('/bar', methods=['POST', 'GET'])
-def bar():
-    global logged, dataset, msg, userID
-    if logged==True:
-        if request.method == "GET":
-            return render_template("bar.html", message=None)
-        elif request.method == "POST":
-            xvar = request.form["X"]
-            yvar = request.form["Y"]
-
-            try:
-                plt.figure()
-                sns.barplot(x=dataset[xvar],y=dataset[yvar],data=dataset)
-                plt.xticks(rotation=90)
-                plt.tight_layout()
-                plt.savefig("static/fig.png", transparent=True)
-
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
-
-                msg = f"static/fig.png?{randomstring}"
-            except:
-                return render_template("bar.html", message = "Error")
-
-            return render_template("bar.html", message=msg)
-    else:
-        return redirect(url_for("homepage"))
-
-@app.route('/hex', methods=['POST', 'GET'])
-def hex():
-    global logged, dataset, msg, userID
-    if logged==True:
-        if request.method == "GET":
-            return render_template("hex.html", message=None)
-        elif request.method == "POST":
-            xvar = request.form["X"]
-            yvar = request.form["Y"]
-
-            try:
-                plt.figure()
-                sns.jointplot(x=dataset[xvar],y=dataset[yvar],data=dataset,kind='hex')
-                #plt.xticks(rotation=90)
-                plt.tight_layout()
-                plt.savefig("static/fig.png", transparent=True)
-
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
-
-                msg = f"static/fig.png?{randomstring}"
-            except:
-                return render_template("hex.html", message = "Error")
-
-            return render_template("hex.html", message=msg)
-    else:
-        return redirect(url_for("homepage"))
-
-@app.route('/cor', methods=['POST', 'GET'])
-def cor():
-    global dataset, logged, msg, userID
-    if logged==True:
-        if request.method == "GET":
-            return render_template("cor.html", message=None)
-        elif request.method == "POST":
-            variables = request.form["variables"]
-            try:
-                variables = variables.replace(', ', ',')
-                listed = np.array(variables.split(','))
-            except:
-                return render_template("cor.html", message="Error")
-
-            try:
-                plt.figure()
-                sns.heatmap(dataset[listed].corr(),cmap='coolwarm',annot=True)
-                plt.tight_layout()
-                plt.savefig("static/fig.png", transparent=True)
-
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
-
-                msg = f"static/fig.png?{randomstring}"
-            except:
-                return render_template("cor.html", message = "Error")
-
-            return render_template("cor.html", message=msg)
-    else:
-        return redirect(url_for("homepage"))
-
-@app.route('/box', methods=['POST', 'GET'])
-def box():
-    global logged, dataset, msg, userID
-    if logged==True:
-        if request.method == "GET":
-            return render_template("box.html", message=None)
-        elif request.method == "POST":
-            xvar = request.form["X"]
-            yvar = request.form["Y"]
-
-            try:
-                plt.figure()
-                sns.boxplot(x=dataset[xvar], y=dataset[yvar], data=dataset, palette="coolwarm")
-                plt.xticks(rotation=90)
-                plt.tight_layout()
-                plt.savefig("static/fig.png", transparent=True)
-
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
-
-                msg = f"static/fig.png?{randomstring}"
-            except:
-                return render_template("box.html", message = "Error")
-
-            return render_template("box.html", message=msg)
-    else:
-        return redirect(url_for("homepage"))
-
-@app.route('/lmplot', methods=['POST', 'GET'])
-def lmplot():
-    global logged, dataset, msg, userID
-    if logged:
-        if request.method == 'GET':
-            return render_template('lmplot.html', message = None)
-        elif request.method == 'POST':
-            xvar = request.form["X"]
-            yvar = request.form["Y"]
-
-            try:
-                plt.figure()
-                sns.lmplot(x = xvar, y = yvar, data = dataset)
-                plt.savefig('static/fig.png', transparent=True)
-
-                randomstring = ''.join(random.choice(string.ascii_letters) for item in range(10))
-
-                msg = f"static/fig.png?{randomstring}"
-            except:
-                return render_template('lmplot.html', message = "Error")
-
-            return render_template('lmplot.html', message = msg)
-        else:
-            return redirect(url_for('homepage'))
-
-#functions===========================================================
 
 def find_by_username(username):
     connection = sqlite3.connect('data.db')
