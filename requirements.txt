@@ -1,0 +1,6 @@
+Flask
+sqlite3
+numpy
+pandas
+seaborn
+matplotlib
