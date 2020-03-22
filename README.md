@@ -3,7 +3,7 @@ Assignment Project for Introduction to Python. Flask Application for Auto Explor
 
 # Dependencies
 
-`Flask, sqlite3, numpy, pandas, seaborn, matplotlib.`
+pip install -r requirements.txt
 
 # To Run
 Download the repository and open your `Terminal` (MacOS) or `Command Prompt` (Windows OS). If you are running Anaconda, open your Anaconda Prompt and find path to repository with AutoEDA App.
